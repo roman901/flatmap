@@ -1,6 +1,0 @@
-struct Map {
-
-}
-impl Map {
-
-}

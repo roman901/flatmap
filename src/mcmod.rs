@@ -2,15 +2,15 @@ use std::fs;
 use std::path::Path;
 use std::io::BufReader;
 use regex::Regex;
-use zip;
-use zip::result::ZipError;
+// use zip;
+// use zip::result::ZipError;
 
 pub struct MCMod {
 
 }
 impl MCMod {
-    pub fn from_file(path: &Path) -> Result<MCMod, ZipError> {
-        let file = fs::File::open(path).unwrap();
+    pub fn from_file(path: &Path) {
+        /*let file = fs::File::open(path).unwrap();
         let reader = BufReader::new(file);
 
         let mut archive = zip::ZipArchive::new(reader).unwrap();
@@ -26,16 +26,16 @@ impl MCMod {
                 }
             };
 
-            let name = file.name();
+            /*let name = file.name();
             if asset_re.is_match(name) {
                 println!(
                     "Entry {} is a directory with name \"{}\"",
                     i,
                     outpath.display()
                 );
-            }
+            }*/
         }
-        Ok(MCMod{})
+        Ok(MCMod{})*/
     }
 }
 
