@@ -52,10 +52,10 @@ impl Region {
 
             let chunk = Chunk::read(&mut chunk_buf)?;
             println!("{:?}", chunk);
-        }
-        /*let blob = Blob::from_zlib_reader(&mut file)?;
+            chunks.push(chunk);
 
-        println!("{:?}", blob);*/
+        }
+
         Ok(Region { chunks })
     }
 }
