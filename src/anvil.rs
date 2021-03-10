@@ -3,8 +3,8 @@ use std::fs::{File};
 use thiserror::Error;
 use nbt::Blob;
 use log::{info, error, debug};
-use std::io::{SeekFrom, Seek, Read};
-
+use std::io::{SeekFrom, Seek, Read, Cursor};
+use byteorder::{BigEndian, ReadBytesExt};
 
 #[derive(Error, Debug)]
 pub enum RegionError {
@@ -14,11 +14,12 @@ pub enum RegionError {
     ParseError(#[from] nbt::Error),
     #[error("Found empty region file")]
     EmptyRegionError(),
-
+    #[error("Found unsupported chunk compression algorithm")]
+    UnsupportedChunkCompression(),
 }
 
 pub struct Region {
-
+    pub chunks: Vec<Chunk>
 }
 impl Region {
     pub fn from_file(path: &Path) -> Result<Region, RegionError> {
@@ -27,31 +28,72 @@ impl Region {
             return Err(RegionError::EmptyRegionError())
         }
         file.seek(SeekFrom::Start(0))?;
+        let mut chunk_offsets = [0u8; 4096];
+        file.read_exact(&mut chunk_offsets)?;
 
-        for i in 0..2 {
+        let mut chunks = Vec::new();
+
+        for i in 0..1 {
             debug!("Processing chunk {}", i);
-            let mut buf = [0; 4];
-            file.seek(SeekFrom::Current(4))?;
-            file.read_exact(&mut buf)?;
-            println!("{:?}", buf);
+            let mut chunk_location = &chunk_offsets[i*4..i*4+4];
+            let chunk_location = chunk_location.read_u32::<BigEndian>()?;
+
+            let offset = ((chunk_location >> 8) & 0xFFFFFF) * 4096;
+            let size = (chunk_location & 0xFF) * 4096;
+            println!("{:?} {:?}", offset, size);
+
+            if size == 0 {
+                continue;
+            }
+
+            let mut chunk_buf = vec![0u8; size as usize];
+            file.seek(SeekFrom::Start(offset as u64))?;
+            file.read_exact(&mut chunk_buf)?;
+
+            let chunk = Chunk::read(&mut chunk_buf)?;
+            println!("{:?}", chunk);
         }
         /*let blob = Blob::from_zlib_reader(&mut file)?;
 
         println!("{:?}", blob);*/
-        Ok(Region{
-
-        })
+        Ok(Region{chunks})
     }
 }
 
-struct Chunk {
+#[derive(Debug)]
+pub struct Chunk {
+    pub sections: Vec<Section>
+}
+impl Chunk {
+    pub fn read(buf: &mut Vec<u8>) -> Result<Chunk, RegionError> {
+        let mut sections = Vec::new();
+        let mut cur = Cursor::new(&buf);
+        let _length = cur.read_u32::<BigEndian>()?;
+        let format = cur.read_u8()?;
+
+        let blob = match format {
+            1 => {
+                Blob::from_gzip_reader(&mut cur)?
+            },
+            2 => {
+                Blob::from_zlib_reader(&mut cur)?
+            },
+            _ => {
+                return Err(RegionError::UnsupportedChunkCompression())
+            }
+        };
+
+        println!("{:?}", blob);
+        Ok(Chunk{sections})
+    }
+}
+
+#[derive(Debug)]
+pub struct Section {
 
 }
 
-struct Section {
-
-}
-
-struct Block {
+#[derive(Debug)]
+pub struct Block {
 
 }
