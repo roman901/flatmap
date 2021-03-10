@@ -1,11 +1,7 @@
 use std::path::Path;
 
-pub struct Render {
-
-}
+pub struct Render {}
 
 impl Render {
-    pub fn render() {
-
-    }
+    pub fn render() {}
 }

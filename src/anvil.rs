@@ -1,10 +1,10 @@
-use std::path::Path;
-use std::fs::{File};
-use thiserror::Error;
-use nbt::Blob;
-use log::{info, error, debug};
-use std::io::{SeekFrom, Seek, Read, Cursor};
 use byteorder::{BigEndian, ReadBytesExt};
+use log::{debug, error, info};
+use nbt::Blob;
+use std::fs::File;
+use std::io::{Cursor, Read, Seek, SeekFrom};
+use std::path::Path;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum RegionError {
@@ -19,13 +19,13 @@ pub enum RegionError {
 }
 
 pub struct Region {
-    pub chunks: Vec<Chunk>
+    pub chunks: Vec<Chunk>,
 }
 impl Region {
     pub fn from_file(path: &Path) -> Result<Region, RegionError> {
         let mut file = File::open(path)?;
         if file.metadata()?.len() == 0 {
-            return Err(RegionError::EmptyRegionError())
+            return Err(RegionError::EmptyRegionError());
         }
         file.seek(SeekFrom::Start(0))?;
         let mut chunk_offsets = [0u8; 4096];
@@ -35,7 +35,7 @@ impl Region {
 
         for i in 0..1 {
             debug!("Processing chunk {}", i);
-            let mut chunk_location = &chunk_offsets[i*4..i*4+4];
+            let mut chunk_location = &chunk_offsets[i * 4..i * 4 + 4];
             let chunk_location = chunk_location.read_u32::<BigEndian>()?;
 
             let offset = ((chunk_location >> 8) & 0xFFFFFF) * 4096;
@@ -56,13 +56,13 @@ impl Region {
         /*let blob = Blob::from_zlib_reader(&mut file)?;
 
         println!("{:?}", blob);*/
-        Ok(Region{chunks})
+        Ok(Region { chunks })
     }
 }
 
 #[derive(Debug)]
 pub struct Chunk {
-    pub sections: Vec<Section>
+    pub sections: Vec<Section>,
 }
 impl Chunk {
     pub fn read(buf: &mut Vec<u8>) -> Result<Chunk, RegionError> {
@@ -72,28 +72,18 @@ impl Chunk {
         let format = cur.read_u8()?;
 
         let blob = match format {
-            1 => {
-                Blob::from_gzip_reader(&mut cur)?
-            },
-            2 => {
-                Blob::from_zlib_reader(&mut cur)?
-            },
-            _ => {
-                return Err(RegionError::UnsupportedChunkCompression())
-            }
+            1 => Blob::from_gzip_reader(&mut cur)?,
+            2 => Blob::from_zlib_reader(&mut cur)?,
+            _ => return Err(RegionError::UnsupportedChunkCompression()),
         };
 
         println!("{:?}", blob);
-        Ok(Chunk{sections})
+        Ok(Chunk { sections })
     }
 }
 
 #[derive(Debug)]
-pub struct Section {
-
-}
+pub struct Section {}
 
 #[derive(Debug)]
-pub struct Block {
-
-}
+pub struct Block {}

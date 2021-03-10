@@ -1,13 +1,11 @@
-use std::fs;
-use std::path::Path;
-use std::io::BufReader;
 use regex::Regex;
+use std::fs;
+use std::io::BufReader;
+use std::path::Path;
 // use zip;
 // use zip::result::ZipError;
 
-pub struct MCMod {
-
-}
+pub struct MCMod {}
 impl MCMod {
     pub fn from_file(path: &Path) {
         /*let file = fs::File::open(path).unwrap();
@@ -39,6 +37,4 @@ impl MCMod {
     }
 }
 
-struct MCPack {
-
-}
+struct MCPack {}

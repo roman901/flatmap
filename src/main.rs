@@ -1,19 +1,19 @@
-mod cache;
-mod render;
-mod mcmod;
 mod anvil;
+mod cache;
+mod mcmod;
+mod render;
 
+use crate::anvil::{Region, RegionError};
+use crate::mcmod::MCMod;
 use clap::Clap;
 use log::{error, info};
-use simplelog::{TermLogger, LevelFilter, Config, TerminalMode};
-use std::fs;
-use std::io::{Error};
-use std::path::Path;
-use std::fs::FileType;
-use crate::mcmod::MCMod;
-use std::process::exit;
 use regex::Regex;
-use crate::anvil::{Region, RegionError};
+use simplelog::{Config, LevelFilter, TermLogger, TerminalMode};
+use std::fs;
+use std::fs::FileType;
+use std::io::Error;
+use std::path::Path;
+use std::process::exit;
 
 #[derive(Clap)]
 #[clap(version = "1.0")]
@@ -24,7 +24,7 @@ struct Opts {
     #[clap(short, long, about = "Path to the output dir")]
     output_dir: String,
 
-    #[clap(short, long, about = "Number of render threads", default_value="1")]
+    #[clap(short, long, about = "Number of render threads", default_value = "1")]
     threads: String,
 }
 
@@ -75,29 +75,32 @@ fn main() -> Result<(), Error> {
 
         let coords = position_re.captures(region_file_name.as_str()).unwrap();
 
-        let region_x = coords.get(1).map(
-            |m| m.as_str().parse::<i32>().unwrap()
-        ).unwrap();
-        let region_z = coords.get(2).map(
-            |m| m.as_str().parse::<i32>().unwrap()
-        ).unwrap();
+        let region_x = coords
+            .get(1)
+            .map(|m| m.as_str().parse::<i32>().unwrap())
+            .unwrap();
+        let region_z = coords
+            .get(2)
+            .map(|m| m.as_str().parse::<i32>().unwrap())
+            .unwrap();
 
         info!("Processing {} {}...", region_x, region_z);
         let region = match Region::from_file(region_path) {
             Ok(region) => region,
             Err(err) => {
                 match err {
-                    RegionError::EmptyRegionError() => {},
-                    _ => error!("Got error while processing {} {}: {}", region_x, region_z, err)
+                    RegionError::EmptyRegionError() => {}
+                    _ => error!(
+                        "Got error while processing {} {}: {}",
+                        region_x, region_z, err
+                    ),
                 }
 
                 continue;
             }
         };
 
-
         // });
-
     }
 
     Ok(())
