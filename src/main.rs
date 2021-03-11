@@ -3,7 +3,8 @@ mod cache;
 mod mcmod;
 mod render;
 
-use crate::anvil::{Region, RegionError};
+use crate::anvil::AnvilError;
+use crate::anvil::region::Region;
 use crate::mcmod::MCMod;
 use clap::Clap;
 use log::{error, info};
@@ -89,7 +90,7 @@ fn main() -> Result<(), Error> {
             Ok(region) => region,
             Err(err) => {
                 match err {
-                    RegionError::EmptyRegionError() => {}
+                    AnvilError::EmptyRegionError() => {}
                     _ => error!(
                         "Got error while processing {} {}: {}",
                         region_x, region_z, err
@@ -99,6 +100,7 @@ fn main() -> Result<(), Error> {
                 continue;
             }
         };
+        println!("{:#?}", region);
 
         // });
     }

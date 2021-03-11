@@ -17,3 +17,5 @@ threadpool = "1.8.1"
 # zip = "0.5.11"
 hematite-nbt = "0.5.1"
 thiserror = "1.0.24"
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0"
